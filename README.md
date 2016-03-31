@@ -1,3 +1,9 @@
+# Intro
+
+This repo houses some code for an interview question I received - I thought it was fun so I plopped it in a repo.  Besides: now the interviewing team can poke around my code and get a sense for my approach to release management as well.
+
+## Game Description
+
 Design the classes and data structure for the game described below. Implement a method playGame() which simulates a game then prints the winning player and their score.
 
 Game rules:
