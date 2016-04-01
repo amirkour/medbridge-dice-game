@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GameDice.cs" />
+    <Compile Include="GameRound.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="PlayerTurn.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
