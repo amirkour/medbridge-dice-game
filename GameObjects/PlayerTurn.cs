@@ -17,6 +17,11 @@ namespace GameObjects
     public class PlayerTurn
     {
         /// <summary>
+        /// Which player took this turn?
+        /// </summary>
+        public int PlayerId { get; set; }
+
+        /// <summary>
         /// The relative number of this turn in a game round
         /// </summary>
         public int TurnNumber { get; set; }
@@ -40,6 +45,9 @@ namespace GameObjects
         {
             PlayerTurn other = obj as PlayerTurn;
             if (other == null)
+                return false;
+
+            if (this.PlayerId != other.PlayerId)
                 return false;
 
             if (this.TurnNumber != other.TurnNumber)
@@ -69,7 +77,7 @@ namespace GameObjects
         /// </summary>
         public override int GetHashCode()
         {
-            int hashcode = this.TurnNumber.GetHashCode();
+            int hashcode = this.PlayerId.GetHashCode() ^ this.TurnNumber.GetHashCode();
             if(this.AvailableDice != null)
             {
                 foreach (GameDice die in this.AvailableDice)
@@ -90,7 +98,7 @@ namespace GameObjects
         public override string ToString()
         {
             StringBuilder bldr = new StringBuilder();
-            bldr.AppendFormat("PlayerTurn: TurnNumber: {0}, ", this.TurnNumber);
+            bldr.AppendFormat("PlayerTurn: PlayerId: {0}, TurnNumber: {1}, ", this.PlayerId, this.TurnNumber);
             if (this.AvailableDice.IsNullOrEmpty())
                 bldr.Append("AvailableDice: None, ");
             else
