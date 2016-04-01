@@ -55,17 +55,19 @@ namespace GameObjects
 
             if (this.AvailableDice == null && other.AvailableDice != null) { return false; }
             if (this.AvailableDice != null && other.AvailableDice == null) { return false; }
+            if (this.AvailableDice.Count != other.AvailableDice.Count) { return false; }
             foreach(GameDice die in this.AvailableDice)
             {
-                if (!other.AvailableDice.Contains(die))
+                if (!other.AvailableDice.Contains(die)) // order doesn't matter for equality of available dice
                     return false;
             }
 
             if (this.KeptDice == null && other.KeptDice != null) { return false; }
             if (this.KeptDice != null && other.KeptDice == null) { return false; }
+            if (this.KeptDice.Count != other.KeptDice.Count) { return false; }
             foreach(GameDice die in this.KeptDice)
             {
-                if (!other.KeptDice.Contains(die))
+                if (!other.KeptDice.Contains(die)) // order doesn't matter for equality of kept dice
                     return false;
             }
 
