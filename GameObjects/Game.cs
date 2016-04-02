@@ -50,9 +50,24 @@ namespace GameObjects
         /// </summary>
         public int WinningPlayerId { get; set; }
 
-        public bool AllRoundsComplete()
+        /// <summary>
+        /// Returns true if all the rounds associated to this game are complete (ie:
+        /// all players have completed their turns for all rounds) and false otherwise.
+        /// </summary>
+        public virtual bool AllRoundsComplete()
         {
-            throw new NotImplementedException();
+            if (this.GameRoundsCompleted.IsNullOrEmpty()) { return this.TotalRoundsInThisGame == 0; }
+            if (this.Players.IsNullOrEmpty()) { return true; }
+            if (this.TotalRoundsInThisGame <= 0) { return true; }
+            if (this.GameRoundsCompleted.Count < this.TotalRoundsInThisGame) { return false; }
+
+            foreach(GameRound round in this.GameRoundsCompleted)
+            {
+                if (!round.AllPlayerTurnsCompleted(this.Players, this.DiceToRollEachRound))
+                    return false;
+            }
+
+            return true;
         }
 
         /// <summary>
