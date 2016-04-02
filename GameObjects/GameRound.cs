@@ -31,9 +31,64 @@ namespace GameObjects
         /// </summary>
         public List<PlayerTurn> TurnsTakenSoFar { get; set; }
 
+        /// <summary>
+        /// In a given game round, a player is considered to have completed their turn if they
+        /// have elected to keep a number of dice equal to the total dice per game round.
+        /// 
+        /// For example: if players are supposed to roll/keep 10 dice per round in a given game,
+        /// but player 1 has only kept 2 (or none at all) during this round, then player 1's turn
+        /// isn't complete for this round.
+        /// 
+        /// The following method returns true if all the given players have kept the given
+        /// number of total dice-per-round, or false otherwise.  This method will also barf if
+        /// there are players present in this game round that are NOT in the given list of players.
+        /// That would be a data-discrepancy, and at runtime we should signal it ASAP.
+        /// </summary>
         public bool AllPlayerTurnsCompleted(List<Player> players, int diceToRollEachRound)
         {
-            throw new NotImplementedException("I'm not implemented!?");
+            // if there are no players given, the only way this round can be considered 'complete'
+            // is if no turns have been taken
+            if (players.IsNullOrEmpty())
+            {
+                if (this.TurnsTakenSoFar.IsNullOrEmpty()) { return true; }
+
+                // no players, but turns have been taken - it's a data discrepancy!
+                throw new Exception("Data discrepancy encountered - this game round has turns recorded, but no players were provided to determine turn completion - please verify data integrity for this game");
+            }
+
+            // if nobody has taken a turn in this round, then the only way the round can
+            // be considered 'complete' is if nobody has to roll any dice!
+            if (this.TurnsTakenSoFar.IsNullOrEmpty()) { return diceToRollEachRound == 0; }
+
+            // iterate on the turns in this round, and keep track of how many dice each player has kept
+            Dictionary<int, int> mapPlayerToKeptDice = new Dictionary<int, int>();
+            foreach(PlayerTurn turn in this.TurnsTakenSoFar)
+            {
+                if (mapPlayerToKeptDice.ContainsKey(turn.PlayerId))
+                    mapPlayerToKeptDice[turn.PlayerId] += turn.KeptDice != null ? turn.KeptDice.Count : 0;
+                else
+                    mapPlayerToKeptDice[turn.PlayerId] = turn.KeptDice != null ? turn.KeptDice.Count : 0;
+            }
+
+            // if this game round has a player turn recorded for someone that's not
+            // in the given list of players, we should report that - it's a data discrepancy
+            foreach(int playerId in mapPlayerToKeptDice.Keys)
+            {
+                if (!players.Exists(player => player.Id == playerId))
+                    throw new Exception(String.Format("Data discrepancy detected - player with id {0} has taken a turn in this game round, but was not included in the list of players to check for turn completion", playerId));
+            }
+
+            // now check to see if all players have kept the right number of dice - 
+            // if even one hasn't, then return false
+            foreach (Player player in players)
+            {
+                if (!mapPlayerToKeptDice.ContainsKey(player.Id)) { return false; }
+                if (mapPlayerToKeptDice[player.Id] != diceToRollEachRound) { return false; }
+            }
+
+            // everything checks out - this round contains all the given players (and not more)
+            // and each one has kept the right number of dice
+            return true;
         }
 
         /// <summary>

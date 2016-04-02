@@ -50,7 +50,7 @@ namespace GameObjectsTests
 
             // now setup a list of player turns, and make sure one of the players is excluded
             List<PlayerTurn> turns = new List<PlayerTurn>();
-            turns.Add(new PlayerTurn() { KeptDice = new List<GameDice>() });
+            turns.Add(new PlayerTurn() { KeptDice = new List<GameDice>(), PlayerId = 1 });
             turns[0].KeptDice.Add(new GameDice() { ActualValue = 1, FaceValue = 1 });
 
             // now t-up our game round for testing - if one of the players isn't in the round,
