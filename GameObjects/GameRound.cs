@@ -31,6 +31,11 @@ namespace GameObjects
         /// </summary>
         public List<PlayerTurn> TurnsTakenSoFar { get; set; }
 
+        public bool AllPlayerTurnsCompleted(List<Player> players, int diceToRollEachRound)
+        {
+            throw new NotImplementedException("I'm not implemented!?");
+        }
+
         /// <summary>
         /// Returns true if this object is considered
         /// equal to the given arg, false otherwise (and
