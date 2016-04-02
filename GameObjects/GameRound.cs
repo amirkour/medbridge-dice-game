@@ -44,7 +44,7 @@ namespace GameObjects
         /// there are players present in this game round that are NOT in the given list of players.
         /// That would be a data-discrepancy, and at runtime we should signal it ASAP.
         /// </summary>
-        public bool AllPlayerTurnsCompleted(List<Player> players, int diceToRollEachRound)
+        public virtual bool AllPlayerTurnsCompleted(List<Player> players, int diceToRollEachRound)
         {
             // if there are no players given, the only way this round can be considered 'complete'
             // is if no turns have been taken
