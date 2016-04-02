@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Utils;
 
 namespace GameObjects
 {
@@ -13,6 +14,13 @@ namespace GameObjects
     [Serializable]
     public class Player
     {
+        /// <summary>
+        /// Typically every player will have a unique ID corresponding to a database
+        /// entry - for this prototype, it probably won't be used since there won't
+        /// be a database
+        /// </summary>
+        public int Id { get; set; }
+
         /// <summary>
         /// Every player has a 'type', like "AI - Easy" or "Human" etc.
         /// At runtime, we can map this 'type' to a game agent that actually
@@ -31,7 +39,7 @@ namespace GameObjects
             if (other == null)
                 return false;
 
-            return Equals(other.Type, this.Type);
+            return this.Id == other.Id && Equals(other.Type, this.Type);
         }
 
         /// <summary>
@@ -39,7 +47,7 @@ namespace GameObjects
         /// </summary>
         public override int GetHashCode()
         {
-            int hashcode = 0;
+            int hashcode = this.Id.GetHashCode();
             if (this.Type != null)
                 hashcode ^= this.Type.GetHashCode();
 
@@ -51,11 +59,14 @@ namespace GameObjects
         /// </summary>
         public override string ToString()
         {
-            string pretty = "Player: ";
-            if (this.Type != null)
-                pretty += "type='" + this.Type + "'"; // string concatenation, not such a big deal for a few measly strings
+            StringBuilder bldr = new StringBuilder();
+            bldr.AppendFormat("Player: Id: {0}, ", this.Id);
+            if (this.Type.IsNullOrEmpty())
+                bldr.Append("Type: none");
+            else
+                bldr.AppendFormat("Type: {0}", this.Type);
 
-            return pretty;
+            return bldr.ToString();
         }
     }
 }

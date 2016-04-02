@@ -17,5 +17,6 @@ namespace Utils
         /// </summary>
         public static bool IsNullOrEmpty<T>(this List<T> list) { return list == null || list.Count <= 0; }
         public static bool IsNullOrEmpty(this object[] arr) { return arr == null || arr.Length <= 0; }
+        public static bool IsNullOrEmpty(this string str) { return str == null || str.Length <= 0; }
     }
 }
