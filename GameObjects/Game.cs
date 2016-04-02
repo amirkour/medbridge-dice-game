@@ -41,7 +41,7 @@ namespace GameObjects
         /// <summary>
         /// How many dice should a player roll on their turn?
         /// </summary>
-        public int DiceToRollEachTurn { get; set; }
+        public int DiceToRollEachRound { get; set; }
 
         /// <summary>
         /// Record the id of the player that wins this game, so it doesn't
@@ -62,7 +62,7 @@ namespace GameObjects
 
             if (this.Id != other.Id) { return false; }
             if (this.TotalRoundsInThisGame != other.TotalRoundsInThisGame) { return false; }
-            if (this.DiceToRollEachTurn != other.DiceToRollEachTurn) { return false; }
+            if (this.DiceToRollEachRound != other.DiceToRollEachRound) { return false; }
             if (this.WinningPlayerId != other.WinningPlayerId) { return false; }
 
             if (this.Players == null && other.Players != null) { return false; }
@@ -95,7 +95,7 @@ namespace GameObjects
         {
             int hashcode = this.Id.GetHashCode() ^ 
                            this.TotalRoundsInThisGame.GetHashCode() ^ 
-                           this.DiceToRollEachTurn.GetHashCode() ^ 
+                           this.DiceToRollEachRound.GetHashCode() ^ 
                            this.WinningPlayerId.GetHashCode();
 
             if(!this.Players.IsNullOrEmpty())
@@ -119,10 +119,10 @@ namespace GameObjects
         public override string ToString()
         {
             StringBuilder bldr = new StringBuilder();
-            bldr.AppendFormat("Game: Id: {0}, TotalRoundsInThisGame: {1}, DiceToRollEachTurn: {2}, WinningPlayerId: {3}, ",
+            bldr.AppendFormat("Game: Id: {0}, TotalRoundsInThisGame: {1}, DiceToRollEachRound: {2}, WinningPlayerId: {3}, ",
                               this.Id,
                               this.TotalRoundsInThisGame,
-                              this.DiceToRollEachTurn,
+                              this.DiceToRollEachRound,
                               this.WinningPlayerId);
 
             if (this.Players.IsNullOrEmpty())
