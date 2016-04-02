@@ -1,5 +1,8 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
+using Utils;
+using GameObjects;
 
 namespace GameObjectsTests
 {
