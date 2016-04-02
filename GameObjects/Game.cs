@@ -50,6 +50,11 @@ namespace GameObjects
         /// </summary>
         public int WinningPlayerId { get; set; }
 
+        public bool AllRoundsComplete()
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Returns true if this object is considered
         /// equal to the given arg, false otherwise (and
