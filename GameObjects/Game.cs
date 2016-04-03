@@ -51,6 +51,14 @@ namespace GameObjects
         public int WinningPlayerId { get; set; }
 
         /// <summary>
+        /// During a dice game, the user(s) may have opted to specify some
+        /// dice as 'wild' or 'modified' - ie: a 3 may be worth 0, etc.
+        /// The following hash will map 'face' values to 'actual' values
+        /// for this game
+        /// </summary>
+        public Dictionary<int,int> MapOfDiceValues { get; set; }
+
+        /// <summary>
         /// Returns true if all the rounds associated to this game are complete (ie:
         /// all players have completed their turns for all rounds) and false otherwise.
         /// </summary>
@@ -173,6 +181,15 @@ namespace GameObjects
                     return false;
             }
 
+            if (this.MapOfDiceValues == null && other.MapOfDiceValues != null) { return false; }
+            if (this.MapOfDiceValues != null && other.MapOfDiceValues == null) { return false; }
+            if (this.MapOfDiceValues.Count != other.MapOfDiceValues.Count) { return false; }
+            foreach(KeyValuePair<int,int> tuple in this.MapOfDiceValues)
+            {
+                if (!other.MapOfDiceValues.ContainsKey(tuple.Key) || other.MapOfDiceValues[tuple.Key] != tuple.Value)
+                    return false;
+            }
+
             return true;
         }
 
@@ -186,16 +203,12 @@ namespace GameObjects
                            this.DiceToRollEachRound.GetHashCode() ^ 
                            this.WinningPlayerId.GetHashCode();
 
-            if(!this.Players.IsNullOrEmpty())
+            if (!this.Players.IsNullOrEmpty()) { this.Players.ForEach(player => hashcode ^= player.GetHashCode()); }
+            if (!this.GameRoundsCompleted.IsNullOrEmpty()) { this.GameRoundsCompleted.ForEach(round => hashcode ^= round.GetHashCode()); }
+            if(!this.MapOfDiceValues.IsNullOrEmpty())
             {
-                foreach (Player player in this.Players)
-                    hashcode ^= player.GetHashCode();
-            }
-
-            if(!this.GameRoundsCompleted.IsNullOrEmpty())
-            {
-                foreach (GameRound round in this.GameRoundsCompleted)
-                    hashcode ^= round.GetHashCode();
+                foreach (KeyValuePair<int, int> tuple in this.MapOfDiceValues)
+                    hashcode ^= tuple.GetHashCode();
             }
 
             return hashcode;
@@ -231,6 +244,17 @@ namespace GameObjects
                 bldr.Append("GameRoundsCompleted: [ ");
                 foreach (GameRound round in this.GameRoundsCompleted)
                     bldr.AppendFormat("[{0}], ", round.ToString());
+
+                bldr.Append("] ");
+            }
+
+            if (this.MapOfDiceValues.IsNullOrEmpty())
+                bldr.Append("MapOfDiceValues: None");
+            else
+            {
+                bldr.Append("MapOfDiceValues: [");
+                foreach (KeyValuePair<int, int> tuple in this.MapOfDiceValues)
+                    bldr.AppendFormat("({0}:{1}), ", tuple.Key, tuple.Value);
 
                 bldr.Append("] ");
             }
