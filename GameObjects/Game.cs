@@ -80,7 +80,53 @@ namespace GameObjects
         /// </summary>
         public virtual List<GameDice> SubtractDice(List<GameDice> left, List<GameDice> right)
         {
-            throw new NotImplementedException();
+            if(left == null) { throw new Exception("Cannot subtract any dice from a null list"); }
+            if(left.Count <= 0)
+            {
+                if (right.IsNullOrEmpty()) { return new List<GameDice>(); }
+
+                throw new Exception("Cannot subtract non-empty right list from empty left list");
+            }
+
+            List<GameDice> result = new List<GameDice>();
+
+            // at this point, we have a 'left' list with elements - if 'right' is null/empty just copy 'left'
+            if(right.IsNullOrEmpty())
+            {
+                left.ForEach(die => result.Add(die));
+                return result;
+            }
+
+            // we need to tally-up the dice in 'left' and then incrementally 'subtract'
+            // the stuff from the 'right' list
+            Dictionary<GameDice, int> map = new Dictionary<GameDice, int>();
+            foreach(GameDice die in left)
+            {
+                if (map.ContainsKey(die))
+                    map[die] += 1;
+                else
+                    map[die] = 1;
+            }
+
+            foreach(GameDice dieToRemove in right)
+            {
+                if (!map.ContainsKey(dieToRemove))
+                    throw new Exception(String.Format("Cannot subtract a die that's in the right list but not the left: {0}", dieToRemove.ToString()));
+
+                if (map[dieToRemove] <= 0)
+                    throw new Exception(String.Format("Cannot subtract a die that's in-excess in the right list: {0}", dieToRemove.ToString()));
+
+                map[dieToRemove] -= 1;
+            }
+
+            foreach(KeyValuePair<GameDice, int> nextDieTuple in map)
+            {
+                if (nextDieTuple.Value <= 0) { continue; }
+                for (int i = 0; i < nextDieTuple.Value; i++)
+                    result.Add(nextDieTuple.Key);
+            }
+
+            return result;
         }
 
         /// <summary>
