@@ -221,6 +221,9 @@ namespace GameObjectsTests
         public void GameTests_GetRolledDice_Throws_ForNegativeArg()
         {
             Game game = new Game();
+            game.MapOfDiceValues = new Dictionary<int, int>();
+            game.MapOfDiceValues[0] = 0;
+
             Exception e = null;
             try
             {
@@ -240,6 +243,13 @@ namespace GameObjectsTests
         {
             int numDieToRoll = 5;
             Game game = new Game();
+            game.MapOfDiceValues = new Dictionary<int, int>();
+            game.MapOfDiceValues[1] = 1;
+            game.MapOfDiceValues[2] = 2;
+            game.MapOfDiceValues[3] = 3;
+            game.MapOfDiceValues[4] = 4;
+            game.MapOfDiceValues[5] = 5;
+            game.MapOfDiceValues[6] = 6;
 
             List<GameDice> listOne = game.GetRolledDice(numDieToRoll);
             List<GameDice> listTwo = game.GetRolledDice(numDieToRoll);
@@ -252,6 +262,24 @@ namespace GameObjectsTests
             Assert.AreNotEqual(listOne[2], listTwo[2]);
             Assert.AreNotEqual(listOne[3], listTwo[3]);
             Assert.AreNotEqual(listOne[4], listTwo[4]);
+        }
+
+        [TestMethod]
+        public void GameTests_GetRolledDice_Throws_IfDiceMappingIsNullOrEmpty()
+        {
+            Exception e = null;
+            Game game = new Game();
+            try
+            {
+                game.GetRolledDice(5);
+                Assert.Fail("This test should have thrown an exception");
+            }
+            catch(Exception ex)
+            {
+                e = ex;
+            }
+
+            Assert.IsNotNull(e);
         }
     }
 }
