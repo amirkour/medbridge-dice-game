@@ -216,5 +216,42 @@ namespace GameObjectsTests
             Assert.AreEqual(left.Count, 2);
             Assert.AreEqual(right.Count, 1);
         }
+
+        [TestMethod]
+        public void GameTests_GetRolledDice_Throws_ForNegativeArg()
+        {
+            Game game = new Game();
+            Exception e = null;
+            try
+            {
+                game.GetRolledDice(-1);
+                Assert.Fail("This test should have thrown an exception");
+            }
+            catch(Exception ex)
+            {
+                e = ex;
+            }
+
+            Assert.IsNotNull(e);
+        }
+
+        [TestMethod]
+        public void GameTests_GetRolledDice_IsRandom()
+        {
+            int numDieToRoll = 5;
+            Game game = new Game();
+
+            List<GameDice> listOne = game.GetRolledDice(numDieToRoll);
+            List<GameDice> listTwo = game.GetRolledDice(numDieToRoll);
+            Assert.IsNotNull(listOne);
+            Assert.IsNotNull(listTwo);
+            Assert.AreEqual(listOne.Count, listTwo.Count);
+            Assert.AreEqual(listOne.Count, numDieToRoll);
+            Assert.AreNotEqual(listOne[0], listTwo[0]);
+            Assert.AreNotEqual(listOne[1], listTwo[1]);
+            Assert.AreNotEqual(listOne[2], listTwo[2]);
+            Assert.AreNotEqual(listOne[3], listTwo[3]);
+            Assert.AreNotEqual(listOne[4], listTwo[4]);
+        }
     }
 }

@@ -130,6 +130,15 @@ namespace GameObjects
         }
 
         /// <summary>
+        /// This method simply returns a list of randomly generated dice - the caller
+        /// can specify how many such dice they want w/ the passed-in arg
+        /// </summary>
+        public virtual List<GameDice> GetRolledDice(int numDiceToRoll)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Returns true if this object is considered
         /// equal to the given arg, false otherwise (and
         /// false if the given arg isn't a Game type.)
