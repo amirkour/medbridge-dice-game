@@ -71,6 +71,19 @@ namespace GameObjects
         }
 
         /// <summary>
+        /// This utility function subtracts the list 'right' from the list 'left', returning
+        /// a new list of dice - neither of the given lists is modified.
+        /// 
+        /// This function is a bit dumb, on purpose.  It assumes that all of 'right' are present
+        /// in 'left' and will barf if it discovers that's not true, primarily because the
+        /// usage of this function (for now) is pretty specific.
+        /// </summary>
+        public virtual List<GameDice> SubtractDice(List<GameDice> left, List<GameDice> right)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Returns true if this object is considered
         /// equal to the given arg, false otherwise (and
         /// false if the given arg isn't a Game type.)

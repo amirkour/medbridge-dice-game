@@ -90,5 +90,131 @@ namespace GameObjectsTests
 
             Assert.IsFalse(game.AllRoundsComplete());
         }
+
+        [TestMethod]
+        public void GameTests_SubtractDice_Throws_WhenLeftIsNull()
+        {
+            Game game = new Game();
+            List<GameDice> right = new List<GameDice>();
+            List<GameDice> left = null;
+            Exception e = null;
+            try
+            {
+                game.SubtractDice(left, right);
+                Assert.Fail("This test was supposed to throw an exception but it didn't");
+            }
+            catch(Exception ex)
+            {
+                e = ex;
+            }
+
+            Assert.IsNotNull(e);
+        }
+
+        [TestMethod]
+        public void GameTests_SubtractDice_ReturnsEmptyList_WhenLeftIsEmpty_AndRightIsNullOrEmpty()
+        {
+            List<GameDice> left = new List<GameDice>();
+            List<GameDice> right = null;
+            Game game = new Game();
+
+            List<GameDice> result = game.SubtractDice(left, right);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(result.Count, 0);
+
+            right = new List<GameDice>();
+            result = game.SubtractDice(left, right);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(result.Count, 0);
+        }
+
+        [TestMethod]
+        public void GameTests_SubtractDice_Throws_WhenRightHasElementsNotInLeft()
+        {
+            List<GameDice> left = new List<GameDice>();
+            List<GameDice> right = new List<GameDice>();
+            right.Add(new GameDice() { ActualValue = 1, FaceValue = 1 });
+            Game game = new Game();
+
+            Exception e = null;
+            try
+            {
+                game.SubtractDice(left, right);
+                Assert.Fail("This test should have thrown an exception");
+            }
+            catch (Exception ex)
+            {
+                e = ex;
+            }
+
+            Assert.IsNotNull(e);
+
+            // now just put something bogus in 'left' and make sure it still barfs
+            left.Add(new GameDice() { ActualValue = right[0].ActualValue + 1, FaceValue = right[0].FaceValue + 1 });
+            e = null;
+            try
+            {
+                game.SubtractDice(left, right);
+                Assert.Fail("This test should have failed but didn't");
+            }
+            catch(Exception ex)
+            {
+                e = ex;
+            }
+
+            Assert.IsNotNull(e);
+        }
+
+        [TestMethod]
+        public void GameTests_SubtractDice_ReturnsListWithElementsOfLeft_WhenRightIsEmptyAndLeftIsNot()
+        {
+            List<GameDice> left = new List<GameDice>();
+            List<GameDice> right = new List<GameDice>();
+            left.Add(new GameDice() { ActualValue = 1, FaceValue = 1 });
+            Game game = new Game();
+
+            List<GameDice> result = game.SubtractDice(left, right);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(result.Count, 1);
+            Assert.IsTrue(result.Contains(left[0]));
+            Assert.IsFalse(result == left); // it shouldn't be the exact same list
+        }
+
+        [TestMethod]
+        public void GameTests_SubtractDice_ReturnsSubtractedElementsInNewList_WhenRightSubtractedFromLeft()
+        {
+            List<GameDice> left = new List<GameDice>();
+            List<GameDice> right = new List<GameDice>();
+            Game game = new Game();
+
+            left.Add(new GameDice() { ActualValue = 1, FaceValue = 1 });
+            left.Add(new GameDice() { ActualValue = 2, FaceValue = 2 });
+            right.Add(left[1]);
+
+            List<GameDice> result = game.SubtractDice(left, right);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(result.Count, 1);
+            Assert.IsTrue(result.Contains(left[0]));
+            Assert.AreEqual(left.Count, 2);  // the original lists should not have been modified at all
+            Assert.AreEqual(right.Count, 1);
+        }
+
+        [TestMethod]
+        public void GameTests_SubtractDice_CanHandleDupeDice()
+        {
+            List<GameDice> left = new List<GameDice>();
+            List<GameDice> right = new List<GameDice>();
+            Game game = new Game();
+
+            left.Add(new GameDice() { ActualValue = 1, FaceValue = 1 });
+            left.Add(new GameDice() { ActualValue = 1, FaceValue = 1 });
+            right.Add(new GameDice() { ActualValue = 1, FaceValue = 1 });
+            List<GameDice> result = game.SubtractDice(left, right);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(result.Count, 1);
+            Assert.IsTrue(result.Contains(left[0]));
+            Assert.AreEqual(left.Count, 2);
+            Assert.AreEqual(right.Count, 1);
+        }
     }
 }
