@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -239,7 +240,7 @@ namespace GameObjectsTests
         }
 
         [TestMethod]
-        public void GameTests_GetRolledDice_IsRandom()
+        public void GameTests_GetRolledDice_GeneratesDice()
         {
             int numDieToRoll = 5;
             Game game = new Game();
@@ -252,16 +253,8 @@ namespace GameObjectsTests
             game.MapOfDiceValues[6] = 6;
 
             List<GameDice> listOne = game.GetRolledDice(numDieToRoll);
-            List<GameDice> listTwo = game.GetRolledDice(numDieToRoll);
             Assert.IsNotNull(listOne);
-            Assert.IsNotNull(listTwo);
-            Assert.AreEqual(listOne.Count, listTwo.Count);
             Assert.AreEqual(listOne.Count, numDieToRoll);
-            Assert.AreNotEqual(listOne[0], listTwo[0]);
-            Assert.AreNotEqual(listOne[1], listTwo[1]);
-            Assert.AreNotEqual(listOne[2], listTwo[2]);
-            Assert.AreNotEqual(listOne[3], listTwo[3]);
-            Assert.AreNotEqual(listOne[4], listTwo[4]);
         }
 
         [TestMethod]
