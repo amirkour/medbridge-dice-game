@@ -138,12 +138,47 @@ namespace GameObjects
         }
 
         /// <summary>
+        /// Just an internal helper fashioned after Int.TryParse et. al. - will 
+        /// get/populate the smallest and largest key of the given mapping of 
+        /// integer-to-integer.  Return strue if successful, false otherwise.
+        /// </summary>
+        protected virtual bool TryGetMinAndMaxKeys(Dictionary<int,int> map, out int min, out int max)
+        {
+            min = max = 0;
+            if (map.IsNullOrEmpty()) { return false; }
+            min = max = map.Keys.First();
+            foreach(KeyValuePair<int,int> tuple in map)
+            {
+                if (tuple.Key < min) { min = tuple.Key; }
+                if (tuple.Key > max) { max = tuple.Key; }
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// This method simply returns a list of randomly generated dice - the caller
         /// can specify how many such dice they want w/ the passed-in arg
         /// </summary>
         public virtual List<GameDice> GetRolledDice(int numDiceToRoll)
         {
-            throw new NotImplementedException();
+            if (this.MapOfDiceValues.IsNullOrEmpty()) { throw new Exception("Cannot generate rolled dice without a mapping of face-to-actual values"); }
+            int minFaceValue = 0;
+            int maxFaceValue = 0;
+            if (!this.TryGetMinAndMaxKeys(this.MapOfDiceValues, out minFaceValue, out maxFaceValue))
+                throw new Exception("Failed to retrieve min and/or max face value for the dice in this game");
+
+            maxFaceValue++; // Random.Next(int,int) is not inclusive on the 'max' value
+            Random rand = new Random(DateTime.Now.Millisecond);
+            List<GameDice> result = new List<GameDice>();
+            for (int i = 0; i < numDiceToRoll; i++)
+            {
+                int nextFaceValue = rand.Next(minFaceValue, maxFaceValue);
+                int nextActualValue = this.MapOfDiceValues.ContainsKey(nextFaceValue) ? this.MapOfDiceValues[nextFaceValue] : nextFaceValue;
+                result.Add(new GameDice() { FaceValue = nextFaceValue, ActualValue = nextActualValue });
+            }
+
+            return result;
         }
 
         /// <summary>
