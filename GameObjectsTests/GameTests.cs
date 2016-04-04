@@ -349,5 +349,94 @@ namespace GameObjectsTests
 
             Assert.IsNotNull(e);
         }
+
+        [TestMethod]
+        public void GameTests_GetPlayerToScoreMapping_Throws_WhenARoundHasAPlayerNotInTheGame()
+        {
+            List<Player> players = new List<Player>();
+            players.Add(new Player() { Id = 1 }); // only 1 player in this game, and they have ID=1
+
+            Dictionary<int, int> roundOneScores = new Dictionary<int, int>();
+            roundOneScores[5] = 10; // player with id 5 has score 10 in round one
+
+            var mockRound = new Mock<GameRound>();
+            mockRound.Setup(round => round.GetRoundScore()).Returns(roundOneScores);
+            List<GameRound> rounds = new List<GameRound>();
+            rounds.Add(mockRound.Object);
+
+            Game game = new Game()
+            {
+                Players = players,
+                GameRoundsCompleted = rounds
+            };
+
+            Exception e = null;
+            try
+            {
+                game.GetPlayerToScoreMapping();
+                Assert.Fail("This test should have thrown an exception");
+            }
+            catch(Exception ex)
+            {
+                e = ex;
+            }
+
+            Assert.IsNotNull(e);
+        }
+
+        [TestMethod]
+        public void GameTests_GetPlayerToScoreMapping_ReturnsMappingOfPlayers_EvenWhenNobodyHasScored()
+        {
+            List<Player> players = new List<Player>();
+            players.Add(new Player() { Id = 1 });
+            players.Add(new Player() { Id = 2 });
+            Game game = new Game() { Players = players };
+
+            Dictionary<int, int> map = game.GetPlayerToScoreMapping();
+            Assert.IsNotNull(map);
+            Assert.AreEqual(map.Count, players.Count);
+            Assert.IsTrue(map.ContainsKey(players[0].Id));
+            Assert.IsTrue(map.ContainsKey(players[1].Id));
+            Assert.IsTrue(map[1] == 0);
+            Assert.IsTrue(map[2] == 0);
+        }
+
+        [TestMethod]
+        public void GameTests_GetPlayerToScoreMapping_ReturnsMappingOfScores()
+        {
+            List<Player> players = new List<Player>();
+            players.Add(new Player() { Id = 1 });
+            players.Add(new Player() { Id = 2 });
+
+            var mockRoundOne = new Mock<GameRound>();
+            Dictionary<int, int> roundOneScores = new Dictionary<int, int>();
+            roundOneScores[1] = 3;
+            roundOneScores[2] = 1;
+            mockRoundOne.Setup(round => round.GetRoundScore()).Returns(roundOneScores);
+
+            var mockRoundTwo = new Mock<GameRound>();
+            Dictionary<int, int> roundTwoScores = new Dictionary<int, int>();
+            roundTwoScores[2] = 3;
+            mockRoundTwo.Setup(round => round.GetRoundScore()).Returns(roundTwoScores);
+
+            List<GameRound> rounds = new List<GameRound>();
+            rounds.Add(mockRoundOne.Object);
+            rounds.Add(mockRoundTwo.Object);
+
+            Game game = new Game()
+            {
+                Players = players,
+                GameRoundsCompleted = rounds
+            };
+
+            // get the scores - they should be the sum of all round scores for each player
+            Dictionary<int, int> scores = game.GetPlayerToScoreMapping();
+            Assert.IsNotNull(scores);
+            Assert.AreEqual(scores.Count, players.Count);
+            Assert.IsTrue(scores.ContainsKey(1));
+            Assert.IsTrue(scores.ContainsKey(2));
+            Assert.AreEqual(scores[1], 3);
+            Assert.AreEqual(scores[2], 4);
+        }
     }
 }

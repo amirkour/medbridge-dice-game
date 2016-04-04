@@ -227,6 +227,72 @@ namespace GameObjects
         }
 
         /// <summary>
+        /// Returns a mapping of player-id to score - the total score for each
+        /// player in this game so far.
+        /// 
+        /// This method should always return something, even if all scores are 0.
+        /// If there's a game round associated to this game that has a starting player that's
+        /// NOT in this game, this method will throw (it's a data discrepancy that should be
+        /// reported.)
+        /// </summary>
+        public virtual Dictionary<int,int> GetPlayerToScoreMapping()
+        {
+            Dictionary<int, int> scores = new Dictionary<int, int>();
+
+            // if there aren't any players in the game, then there shouldn't be any game rounds either.
+            // if there are rounds, throw.  otherwise, just return the empty list of scores.
+            if(this.Players.IsNullOrEmpty())
+            {
+                if (!this.GameRoundsCompleted.IsNullOrEmpty()) { throw new Exception("This game has no players, but there are recorded game rounds present - this should not be possible!?"); }
+
+                return scores;
+            }
+
+            // likewise, if there are no rounds recorded, just kick back 0-scores for everybody
+            if(this.GameRoundsCompleted.IsNullOrEmpty())
+            {
+                this.Players.ForEach(player => scores[player.Id] = 0);
+                return scores;
+            }
+
+            foreach(GameRound round in this.GameRoundsCompleted)
+            {
+                Dictionary<int, int> roundScores = round.GetRoundScore();
+                if (roundScores.IsNullOrEmpty())
+                    continue;
+
+                foreach(KeyValuePair<int,int> tuple in roundScores)
+                {
+                    if (scores.ContainsKey(tuple.Key))
+                        scores[tuple.Key] += tuple.Value;
+                    else
+                        scores[tuple.Key] = tuple.Value;
+                }
+            }
+
+            // now we have to audit the scores - if there's a player ID in their for whom no player
+            // exists in this game, we should report it here cuz it's a data discrepancy.
+            //
+            // and while we're tallying-up the player IDs, let's make sure the score table has
+            // SOMETHING recorded for them
+            HashSet<int> validIds = new HashSet<int>();
+            foreach(Player player in this.Players)
+            {
+                validIds.Add(player.Id);
+                if (!scores.ContainsKey(player.Id))
+                    scores[player.Id] = 0;
+            }
+
+            foreach(KeyValuePair<int,int> tuple in scores)
+            {
+                if(!validIds.Contains(tuple.Key))
+                    throw new Exception(String.Format("This game has a score recorded for player with id {0} but no such player exists in this game!", tuple.Key));
+            }
+
+            return scores;
+        }
+
+        /// <summary>
         /// Returns true if this object is considered
         /// equal to the given arg, false otherwise (and
         /// false if the given arg isn't a Game type.)
