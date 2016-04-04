@@ -107,5 +107,30 @@ namespace GameObjectsTests
 
             Assert.IsNotNull(e);
         }
+
+        [TestMethod]
+        public void GameRoundTests_GetRoundScore_ReturnsMapping_ForKeptDiceValues()
+        {
+            List<PlayerTurn> turns = new List<PlayerTurn>();
+            turns.Add(new PlayerTurn() { KeptDice = new List<GameDice>(), AvailableDice = new List<GameDice>(), PlayerId = 1 });
+            turns[0].KeptDice.Add(new GameDice() { ActualValue = 1, FaceValue = 1 });
+            turns[0].KeptDice.Add(new GameDice() { ActualValue = 2, FaceValue = 2 });// during this turn, player 1 kept 2 dice
+
+            turns.Add(new PlayerTurn() { KeptDice = new List<GameDice>(), AvailableDice = new List<GameDice>(), PlayerId = 2 });
+            turns[1].KeptDice.Add(new GameDice() { ActualValue = 3, FaceValue = 3 });// during this turn, player 2 kept 1 die
+
+            GameRound round = new GameRound()
+            {
+                TurnsTakenSoFar = turns
+            };
+
+            // ok - player 1 and 2 should both have a total score of 3 for this round (the sum of their "kept dice")
+            Dictionary<int, int> scoreMap = round.GetRoundScore();
+            Assert.IsNotNull(scoreMap);
+            Assert.IsTrue(scoreMap.ContainsKey(1));
+            Assert.IsTrue(scoreMap.ContainsKey(2));
+            Assert.AreEqual(scoreMap[1], 3);
+            Assert.AreEqual(scoreMap[2], 3);
+        }
     }
 }

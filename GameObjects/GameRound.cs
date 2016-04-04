@@ -92,6 +92,30 @@ namespace GameObjects
         }
 
         /// <summary>
+        /// This method will return a mapping of player-id
+        /// to score.
+        /// </summary>
+        public virtual Dictionary<int,int> GetRoundScore()
+        {
+            Dictionary<int, int> mapPlayerToScore = new Dictionary<int, int>();
+            if (this.TurnsTakenSoFar.IsNullOrEmpty()) { return mapPlayerToScore; }
+
+            foreach(PlayerTurn turn in this.TurnsTakenSoFar)
+            {
+                if (turn.KeptDice.IsNullOrEmpty()) { continue; }
+                foreach(GameDice keptDie in turn.KeptDice)
+                {
+                    if (mapPlayerToScore.ContainsKey(turn.PlayerId))
+                        mapPlayerToScore[turn.PlayerId] += keptDie.ActualValue;
+                    else
+                        mapPlayerToScore[turn.PlayerId] = keptDie.ActualValue;
+                }
+            }
+
+            return mapPlayerToScore;
+        }
+
+        /// <summary>
         /// Returns true if this object is considered
         /// equal to the given arg, false otherwise (and
         /// false if the given arg isn't a GameRound type.)
