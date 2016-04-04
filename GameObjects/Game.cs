@@ -190,7 +190,40 @@ namespace GameObjects
         /// </summary>
         public virtual Player GetNextStartingPlayer()
         {
-            throw new NotImplementedException();
+            if (this.Players.IsNullOrEmpty()) { throw new Exception("Cannot get a starting player when the game has no/null players"); }
+            if (this.GameRoundsCompleted.IsNullOrEmpty()) { return this.Players[0]; }
+
+            // map each player in this game to a bool - true if they've started, false otherwise
+            Dictionary<int, bool> mapStarters = new Dictionary<int, bool>();
+            this.Players.ForEach(player => mapStarters[player.Id] = false);
+
+            // now hit each game round - if the round has a starting player id that doesn't
+            // exist in this game, it's a data discrepancy that needs to be reported.
+            // otherwise, toggle the status for that player in our mapping
+            foreach(GameRound round in this.GameRoundsCompleted)
+            {
+                if (!mapStarters.ContainsKey(round.StartingPlayerId))
+                    throw new Exception(String.Format("Encountered starting player id {0} in one of this game's rounds - this player id doesn't exist in the current game!", round.StartingPlayerId));
+                else
+                    mapStarters[round.StartingPlayerId] = true;
+            }
+
+            // now pick a random starter.  if everyone has already started,
+            // just randomly pick the next starter
+            Player nextStarter = null;
+            foreach(KeyValuePair<int,bool> tuple in mapStarters)
+            {
+                if(tuple.Value == false)
+                {
+                    nextStarter = this.Players.First(player => player.Id == tuple.Key);
+                    break;
+                }
+            }
+
+            if (nextStarter == null)
+                nextStarter = this.Players[0];
+
+            return nextStarter;
         }
 
         /// <summary>
