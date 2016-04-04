@@ -182,6 +182,18 @@ namespace GameObjects
         }
 
         /// <summary>
+        /// As every game progresses, every player in the game should get a chance
+        /// to start a round - this method will give back the player who should start
+        /// the next round.
+        /// 
+        /// For now, the algorithm is just 'round robin'
+        /// </summary>
+        public virtual Player GetNextStartingPlayer()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Returns true if this object is considered
         /// equal to the given arg, false otherwise (and
         /// false if the given arg isn't a Game type.)

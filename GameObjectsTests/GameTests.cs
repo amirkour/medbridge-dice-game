@@ -274,5 +274,80 @@ namespace GameObjectsTests
 
             Assert.IsNotNull(e);
         }
+
+        [TestMethod]
+        public void GameTests_GetNextStartingPlayer_Throws_IfThereAreNoPlayers()
+        {
+            Game game = new Game() { Players = null };
+            Exception e = null;
+            try
+            {
+                game.GetNextStartingPlayer();
+                Assert.Fail("This test was supposed to throw an exception");
+            }
+            catch(Exception ex)
+            {
+                e = ex;
+            }
+
+            Assert.IsNotNull(e);
+        }
+
+        [TestMethod]
+        public void GameTests_GetNextStartingPlayer_ReturnsPlayer_ThatHasntStartedYet()
+        {
+            List<Player> players = new List<Player>();
+            players.Add(new Player() { Id = 1 });
+            players.Add(new Player() { Id = 2 });
+
+            List<GameRound> rounds = new List<GameRound>();
+
+            Game game = new Game()
+            {
+                Players = players,
+                GameRoundsCompleted = rounds
+            };
+
+            // fetch a starting player, and then set that players as having started and
+            // try again - the second time we fetch a starting player, it shouldn't be
+            // equal to the first!
+            Player firstStarter = game.GetNextStartingPlayer();
+            Assert.IsNotNull(firstStarter);
+            Assert.IsTrue(firstStarter.Equals(players[0]) || firstStarter.Equals(players[1]));
+
+            rounds.Add(new GameRound() { StartingPlayerId = firstStarter.Id });
+
+            Player secondStarter = game.GetNextStartingPlayer();
+            Assert.IsNotNull(secondStarter);
+            Assert.AreNotEqual(firstStarter, secondStarter);
+            Assert.AreNotEqual(secondStarter.Id, game.GameRoundsCompleted[0].StartingPlayerId);
+        }
+
+        [TestMethod]
+        public void GameTests_GetNextStartingPlayer_Throws_IfARoundHadAStartingPlayerNotInTheGame()
+        {
+            List<Player> players = new List<Player>();
+            players.Add(new Player() { Id = 1 });
+            List<GameRound> rounds = new List<GameRound>();
+            rounds.Add(new GameRound() { StartingPlayerId = 5 }); // this player isn't in the list!
+
+            Game game = new Game()
+            {
+                Players = players,
+                GameRoundsCompleted = rounds
+            };
+            Exception e = null;
+            try
+            {
+                game.GetNextStartingPlayer();
+                Assert.Fail("This test should have thrown an exception");
+            }
+            catch(Exception ex)
+            {
+                e = ex;
+            }
+
+            Assert.IsNotNull(e);
+        }
     }
 }
