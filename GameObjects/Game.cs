@@ -293,6 +293,52 @@ namespace GameObjects
         }
 
         /// <summary>
+        /// At any time in the game, you can call this method to retrieve the current lowest-scoring
+        /// player (or null if nobody has scored.)  This method returns a list, because if there's
+        /// a tie, then all lowest scorers are returned.
+        /// </summary>
+        public virtual List<Player> GetLowestScoringPlayers()
+        {
+            if (this.Players.IsNullOrEmpty()) { return null; }
+
+            Dictionary<int, int> scores = this.GetPlayerToScoreMapping();
+            if (scores.IsNullOrEmpty()) { return null; }
+            if (scores.Count != this.Players.Count) { throw new Exception("Expected this game score table to have a score for every single player present, but that was not the case!?"); }
+
+            // audit the score table - make sure all player IDs match up, otherwise
+            // we have a data discrepancy.  and while we're iterating on the list of players,
+            // let's hash them to their IDs for fast lookup later
+            Dictionary<int, Player> playerMapping = new Dictionary<int, Player>();
+            foreach(Player player in this.Players)
+            {
+                if (!scores.ContainsKey(player.Id))
+                    throw new Exception("This game has a score table with a player ID that is not present in the game!");
+
+                playerMapping[player.Id] = player;
+            }
+
+            int lowestScorerId = scores.First().Key;
+            int lowestScorerValue = scores.First().Value;
+            foreach(KeyValuePair<int,int> tuple in scores)
+            {
+                if(tuple.Value < lowestScorerValue)
+                {
+                    lowestScorerId = tuple.Key;
+                    lowestScorerValue = tuple.Value;
+                }
+            }
+
+            List<Player> lowestScorers = new List<Player>();
+            foreach(KeyValuePair<int,int> tuple in scores)
+            {
+                if (tuple.Value == lowestScorerValue)
+                    lowestScorers.Add(playerMapping[tuple.Key]);
+            }
+            
+            return lowestScorers;
+        }
+
+        /// <summary>
         /// Returns true if this object is considered
         /// equal to the given arg, false otherwise (and
         /// false if the given arg isn't a Game type.)

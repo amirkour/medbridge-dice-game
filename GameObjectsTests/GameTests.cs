@@ -438,5 +438,101 @@ namespace GameObjectsTests
             Assert.AreEqual(scores[1], 3);
             Assert.AreEqual(scores[2], 4);
         }
+
+        [TestMethod]
+        public void GameTests_GetLowestScoringPlayers_ReturnsNull_InAbsenceOfPlayers()
+        {
+            Game game = new Game()
+            {
+                Players = null
+            };
+
+            Assert.IsNull(game.GetLowestScoringPlayers());
+
+            game.Players = new List<Player>();
+            Assert.IsNull(game.GetLowestScoringPlayers());
+        }
+
+        [TestMethod]
+        public void GameTests_GetLowestScoringPlayers_ReturnsEveryone_InAbsenceOfGameRounds()
+        {
+            Game game = new Game()
+            {
+                Players = new List<Player>(),
+                GameRoundsCompleted = null
+            };
+            game.Players.Add(new Player() { Id = 1 });
+            game.Players.Add(new Player() { Id = 2 });
+
+            List<Player> lowScorers = game.GetLowestScoringPlayers();
+            Assert.IsNotNull(lowScorers);
+            Assert.AreEqual(game.Players.Count, lowScorers.Count);
+            Assert.IsTrue(lowScorers.Contains(game.Players[0]));
+            Assert.IsTrue(lowScorers.Contains(game.Players[1]));
+        }
+
+        [TestMethod]
+        public void GameTests_GetLowestScoringPlayers_Throws_IfScoresHavePlayerNotInGame()
+        {
+            List<Player> players = new List<Player>();
+            players.Add(new Player() { Id = 1 }); // only one player in this game, with ID=1
+
+            // now generate a mock score table, with scores for a player not in this game
+            Dictionary<int, int> scores = new Dictionary<int, int>();
+            scores[1] = 1;
+            scores[2] = 3;//this is the bogus one
+
+            var mockGame = new Mock<Game>();
+            mockGame.Setup(game => game.GetPlayerToScoreMapping()).Returns(scores);
+            mockGame.Object.Players = players;
+            Exception e = null;
+            try
+            {
+                mockGame.Object.GetLowestScoringPlayers();
+                Assert.Fail("This test should have thrown an exception");
+            }
+            catch(Exception ex)
+            {
+                e = ex;
+            }
+
+            Assert.IsNotNull(e);
+        }
+
+        [TestMethod]
+        public void GameTests_GetLowestScoringPlayers_ReturnsLowestScoringPlayer()
+        {
+            List<Player> players = new List<Player>();
+            players.Add(new Player() { Id = 1 });
+            players.Add(new Player() { Id = 2 });
+
+            // assemble some mock game rounds and scores
+            Dictionary<int, int> roundOneScore = new Dictionary<int, int>();
+            roundOneScore[1] = 3;
+            roundOneScore[2] = 1; // so player 2 is the lowest scorer in round 1
+            var mockRoundOne = new Mock<GameRound>();
+            mockRoundOne.Setup(round => round.GetRoundScore()).Returns(roundOneScore);
+
+            Dictionary<int, int> roundTwoScore = new Dictionary<int, int>();
+            roundTwoScore[1] = 1;
+            roundTwoScore[2] = 1; // both players tie in round 2 - so layer 2 is still the lowest!
+            var mockRoundTwo = new Mock<GameRound>();
+            mockRoundTwo.Setup(round => round.GetRoundScore()).Returns(roundTwoScore);
+
+            List<GameRound> rounds = new List<GameRound>();
+            rounds.Add(mockRoundOne.Object);
+            rounds.Add(mockRoundTwo.Object);
+
+            Game game = new Game()
+            {
+                Players = players,
+                GameRoundsCompleted = rounds
+            };
+
+            List<Player> lowScorers = game.GetLowestScoringPlayers();
+            Assert.IsNotNull(lowScorers);
+            Assert.AreEqual(lowScorers.Count, 1);
+            Assert.AreEqual(lowScorers[0], game.Players[1]);
+        }
     }
 }
