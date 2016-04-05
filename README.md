@@ -16,3 +16,7 @@ Those dice which are not kept are rolled again and each round she must keep at l
 Once each player has rolled the player who scored the lowest wins.
 Repeat for three more rounds in succession so that the next person starts rolling first (at the end each player will have started).
 After all four rounds have been completed the player with the lowest combined score wins.
+
+## Issue Tracking
+
+I'm using Trello to document/track the actual work for this guy (to make sure I don't take too long implementing this - it is an interview after all!)  [Check it out here](https://trello.com/b/AU9KAhp3)
