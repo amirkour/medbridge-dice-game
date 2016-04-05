@@ -96,6 +96,19 @@ namespace GameAgents
             return bldr.ToString();
         }
 
+        protected string GetDiceMappingFor(Game game)
+        {
+            if (game == null) { return "No Dice Mapping Available"; }//todo - log this as an error
+            if (game.MapOfDiceValues.IsNullOrEmpty()) { return "Dice mapping values unavailable"; }//todo - log this as an error
+
+            StringBuilder bldr = new StringBuilder();
+            bldr.Append("Dice values for this game:\n");
+            foreach (KeyValuePair<int, int> tuple in game.MapOfDiceValues)
+                bldr.AppendFormat("All {0} die are worth {1} points\n", tuple.Key, tuple.Value);
+
+            return bldr.ToString();
+        }
+
         protected void PrintStatusFor(Game game, Player currentPlayer)
         {
             if (game == null) { return; } // todo - log this error
@@ -114,8 +127,8 @@ namespace GameAgents
             }
 
             _out.WriteLine(String.Format("You are currently in round {0} of {1} for this game", this.GetCurrentRoundNumberFor(game), game.TotalRoundsInThisGame));
-            _out.WriteLine(String.Format("{0}", this.GetPrettyScoreTableFor(game, currentPlayer)));
-
+            _out.WriteLine(this.GetPrettyScoreTableFor(game, currentPlayer));
+            _out.WriteLine(this.GetDiceMappingFor(game));
         }
 
         protected void PrintHelp()
