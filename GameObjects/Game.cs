@@ -192,39 +192,43 @@ namespace GameObjects
         public virtual Player GetNextStartingPlayer()
         {
             if (this.Players.IsNullOrEmpty()) { throw new Exception("Cannot get a starting player when the game has no/null players"); }
-            if (this.GameRoundsCompleted.IsNullOrEmpty()) { return this.Players[0]; }
 
-            // map each player in this game to a bool - true if they've started, false otherwise
-            Dictionary<int, bool> mapStarters = new Dictionary<int, bool>();
-            this.Players.ForEach(player => mapStarters[player.Id] = false);
+            // sort the players by their ID, so that we can obey a round-robin ordering.
+            // the bool that each id maps to will indicate if that player has started (true)
+            // or not (false)
+            SortedDictionary<int, bool> sortedIDs = new SortedDictionary<int, bool>();
+            this.Players.ForEach(player => sortedIDs.Add(player.Id, false));
+
+            if (this.GameRoundsCompleted.IsNullOrEmpty())
+                return this.Players.Find(player => player.Id == sortedIDs.Keys.Min());
 
             // now hit each game round - if the round has a starting player id that doesn't
             // exist in this game, it's a data discrepancy that needs to be reported.
             // otherwise, toggle the status for that player in our mapping
             foreach(GameRound round in this.GameRoundsCompleted)
             {
-                if (!mapStarters.ContainsKey(round.StartingPlayerId))
+                if (!sortedIDs.ContainsKey(round.StartingPlayerId))
                     throw new Exception(String.Format("Encountered starting player id {0} in one of this game's rounds - this player id doesn't exist in the current game!", round.StartingPlayerId));
                 else
-                    mapStarters[round.StartingPlayerId] = true;
+                    sortedIDs[round.StartingPlayerId] = true;
             }
 
-            // now pick a random starter.  if everyone has already started,
-            // just randomly pick the next starter
-            Player nextStarter = null;
-            foreach(KeyValuePair<int,bool> tuple in mapStarters)
+            // now pick the next player to start, in round-robin order.
+            // if everyone has started, start from the beginning again - the lowest player.
+            if (sortedIDs.Values.All(val => val == true))
+                return this.Players.Find(player => player.Id == sortedIDs.Keys.Min());
+
+            List<int> keyList = sortedIDs.Keys.ToList<int>();
+            int i = 0;
+            for(; i < keyList.Count; i++)
             {
-                if(tuple.Value == false)
-                {
-                    nextStarter = this.Players.First(player => player.Id == tuple.Key);
+                if (sortedIDs[keyList[i]])
                     break;
-                }
             }
+            while (sortedIDs[keyList[i]])
+                i = (i + 1) % keyList.Count;
 
-            if (nextStarter == null)
-                nextStarter = this.Players[0];
-
-            return nextStarter;
+            return this.Players.Find(player => player.Id == keyList[i]);
         }
 
         /// <summary>

@@ -162,15 +162,25 @@ namespace MedbridgeDiceGame
 
             Console.Out.WriteLine(String.Format("Starting round {0} - player with id {1} goes first ...", nextRoundNumber, nextStartingPlayer.Id));
 
-            // give this round's starting player a shot to go, then let everybody else go in order
-            this.TakeTurnForPlayerInRound(game, nextStartingPlayer, nextRound);
-            
-            foreach(Player player in game.Players)
-            {
-                if (player.Id == nextStartingPlayer.Id) { continue; }
-                this.TakeTurnForPlayerInRound(game, player, nextRound);
-            }
+            // in order to preserve round-robin from round-to-round, the players need to
+            // be sorted a certain way - i'll do it by their IDs here, and then make
+            // sure that the players progress in turn-order, starting from the first player for
+            // this round and swinging back around ...
+            SortedDictionary<int, Player> sortedPlayers = new SortedDictionary<int, Player>();
+            game.Players.ForEach(player => sortedPlayers.Add(player.Id, player));
+            List<int> sortedIDs = sortedPlayers.Keys.ToList<int>();
+            int nextPlayerKeyIndex = 0;
+            while (sortedIDs[nextPlayerKeyIndex] != nextStartingPlayer.Id)
+                nextPlayerKeyIndex++;
 
+            int playersGoneSoFar = 0;
+            do
+            {
+                this.TakeTurnForPlayerInRound(game, sortedPlayers[sortedIDs[nextPlayerKeyIndex]], nextRound);
+                nextPlayerKeyIndex = (nextPlayerKeyIndex + 1) % sortedIDs.Count;
+                playersGoneSoFar++;
+            } while (playersGoneSoFar < game.Players.Count);
+            
             // all done - add this round to the game and we're off to the races!
             game.GameRoundsCompleted.Add(nextRound);
 
