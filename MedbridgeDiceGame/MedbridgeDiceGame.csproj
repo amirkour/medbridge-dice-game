@@ -50,9 +50,17 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\GameAgents\GameAgents.csproj">
+      <Project>{79ddd910-b904-45f5-a25d-6e6abefd33d7}</Project>
+      <Name>GameAgents</Name>
+    </ProjectReference>
     <ProjectReference Include="..\GameObjects\GameObjects.csproj">
       <Project>{f97913a5-6c25-411e-b009-f977b640c43e}</Project>
       <Name>GameObjects</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Utils\Utils.csproj">
+      <Project>{196b08eb-e16a-406c-a3dd-9d3173b2adb3}</Project>
+      <Name>Utils</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
