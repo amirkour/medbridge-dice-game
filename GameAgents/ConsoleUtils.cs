@@ -23,7 +23,7 @@ namespace GameAgents
             int gameRound = 1;
             foreach (GameRound round in game.GameRoundsCompleted)
             {
-                if (round.AllPlayerTurnsCompleted(game.Players, game.TotalRoundsInThisGame))
+                if (round.AllPlayerTurnsCompleted(game.Players, game.DiceToRollEachRound))
                     gameRound++;
             }
 
