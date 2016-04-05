@@ -155,7 +155,7 @@ namespace GameAgents
                 _out.WriteLine("------------------------");
                 _out.WriteLine("[S]\tFor up-to-date game stats");
                 _out.WriteLine("[H]\tFor help/instructions");
-                _out.WriteLine("[Q]\tWhen you're done making your selection");
+                _out.WriteLine("[C]\tWhen you're done making your selection");
                 _out.WriteLine("------------------------");
                 _out.WriteLine("Please make a selection:");
 
@@ -173,15 +173,15 @@ namespace GameAgents
                 switch(input.Substring(0,1).ToLower())
                 {
                     // user wants to quit/stop
-                    case "q":
-                    case "Q":
+                    case "c":
+                    case "C":
 
                         // only let the user quit if they've successfully selected one die.
                         // in other words: at least one die is no longer available
                         if (this.AtLeastOneIsFalse(availability.Values))
                         {
                             _out.WriteLine("");
-                            _out.WriteLine("Halting ...");
+                            _out.WriteLine("Continuing ...");
                             _out.WriteLine("");
                             halt = true;
                         }

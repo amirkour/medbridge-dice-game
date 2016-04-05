@@ -11,6 +11,41 @@ namespace MedbridgeDiceGame
 {
     public class Program
     {
+
+        /// <summary>
+        /// This helper simply returns a pretty string with the player's id and the available/kept dice provided, so
+        /// we can see what selections the AI are making during our little game!
+        /// </summary>
+        protected string PrintPlayerDiceSelection(Player player, List<GameDice> available, List<GameDice> selected)
+        {
+            if (player == null || available == null || selected == null) { return "Cannot determine dice selection of null player and/or dice lists"; }
+            StringBuilder bldr = new StringBuilder();
+            bldr.AppendFormat("Player {0} made the following dice selection(s): ", player.Id);
+            if (available.IsNullOrEmpty())
+                bldr.Append("Available Dice: None ");
+            else
+            {
+                bldr.Append("Available Dice: [");
+                foreach (GameDice die in available)
+                    bldr.AppendFormat("{0},", die.FaceValue);
+
+                bldr.Append("], ");
+            }
+
+            if (selected.IsNullOrEmpty())
+                bldr.Append("Selected Dice: None");
+            else
+            {
+                bldr.Append("Selected Dice: [");
+                foreach (GameDice die in selected)
+                    bldr.AppendFormat("{0},", die.FaceValue);
+
+                bldr.Append("]");
+            }
+
+            return bldr.ToString();
+        }
+
         /// <summary>
         /// This helper will simply configure/return a game object according to the rules
         /// lain out by the interview, which can be found in the README for this repo/project.
@@ -90,6 +125,8 @@ namespace MedbridgeDiceGame
                 round.TurnsTakenSoFar.Add(nextTurn);
                 turnsTakenSoFar.Add(nextTurn);
 
+                Console.WriteLine(String.Format("For turn {0}: {1}", turnNumber, this.PrintPlayerDiceSelection(player, remainingDice, diceToKeep)));
+
                 remainingDice = game.GetRolledDice(remainingDice.Count - diceToKeep.Count);
                 turnNumber++;
             }
@@ -135,15 +172,16 @@ namespace MedbridgeDiceGame
             }
 
             // all done - add this round to the game and we're off to the races!
-            Console.WriteLine(String.Format("Round {0} complete!", nextRoundNumber));
             game.GameRoundsCompleted.Add(nextRound);
+
+            Console.WriteLine(String.Format("Round {0} complete!", nextRoundNumber));
+            Console.WriteLine(ConsoleUtils.GetPrettyScoreTableFor(game));
         }
 
         protected void PrintResultsOf(Game game, Player humanPlayer)
         {
             if (game == null) { throw new Exception("Cannot print results of null game"); }
-
-            Console.Out.WriteLine("Here's are the final scores for the game ...");
+            
             Console.WriteLine(ConsoleUtils.GetPrettyScoreTableFor(game, humanPlayer));
             Console.WriteLine("");
 
@@ -166,6 +204,10 @@ namespace MedbridgeDiceGame
             Console.WriteLine("Setting up a default dice game ...");
             Player humanPlayer = null;
             Game gameToPlay = this.GetPreConfiguredDefaultGame(out humanPlayer);
+
+            Console.WriteLine("");
+            Console.WriteLine(String.Format("Your player id is {0}", humanPlayer.Id));
+            Console.WriteLine("");
 
             Console.WriteLine("Entering main game loop ...");
             while (!gameToPlay.IsGameOver())

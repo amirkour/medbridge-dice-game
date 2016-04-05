@@ -36,7 +36,7 @@ namespace GameAgents
         /// </summary>
         public static string GetPrettyScoreTableFor(Game game, Player currentPlayer = null)
         {
-            if (game == null || currentPlayer == null) { return "Score unavailable\n"; }//todo - log error here
+            if (game == null) { return "Score unavailable\n"; }//todo - log error here
 
             StringBuilder bldr = new StringBuilder();
             Dictionary<int, int> scores = game.GetPlayerToScoreMapping();
