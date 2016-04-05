@@ -44,11 +44,12 @@ namespace GameObjects
         public int DiceToRollEachRound { get; set; }
 
         /// <summary>
-        /// Record the id of the player that wins this game, so it doesn't
+        /// Record the id of the players that won this game, so it doesn't
         /// have to be calculated over and over again, and to indicate when
-        /// this game is considered complete
+        /// this game is considered complete.  Remember: there could be a
+        /// tie at the end of the game!
         /// </summary>
-        public int WinningPlayerId { get; set; }
+        public List<int> WinningPlayerIds { get; set; }
 
         /// <summary>
         /// During a dice game, the user(s) may have opted to specify some
@@ -339,6 +340,33 @@ namespace GameObjects
         }
 
         /// <summary>
+        /// Returns true if this game is over, false otherwise.  Will also calculate/set the list
+        /// of winning players for this game if that list hasn't been populated already and the game
+        /// is over.  Callers are advised to 'save' or persist this object to storage after this function
+        /// returns 'true' because it updates the state of the object.
+        /// </summary>
+        public bool IsGameOver()
+        {
+            // if a winning player id was previously recorded, consider this game over and return
+            if (!this.WinningPlayerIds.IsNullOrEmpty()) { return true; }
+
+            // otherwise, see if all rounds are complete - then the game is over and we should
+            // make sure to record a winning player ID to save time in the future.
+            if (this.AllRoundsComplete())
+            {
+                List<Player> winners = this.GetLowestScoringPlayers();
+                if (winners.IsNullOrEmpty())
+                    throw new Exception("All rounds are complete for this game, but no winning players could be deduced!");
+
+                this.WinningPlayerIds = this.WinningPlayerIds == null ? new List<int>() : this.WinningPlayerIds;
+                winners.ForEach(player => this.WinningPlayerIds.Add(player.Id));
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Returns true if this object is considered
         /// equal to the given arg, false otherwise (and
         /// false if the given arg isn't a Game type.)
@@ -351,7 +379,15 @@ namespace GameObjects
             if (this.Id != other.Id) { return false; }
             if (this.TotalRoundsInThisGame != other.TotalRoundsInThisGame) { return false; }
             if (this.DiceToRollEachRound != other.DiceToRollEachRound) { return false; }
-            if (this.WinningPlayerId != other.WinningPlayerId) { return false; }
+
+            if (this.WinningPlayerIds == null && other.WinningPlayerIds != null) { return false; }
+            if (this.WinningPlayerIds != null && other.WinningPlayerIds == null) { return false; }
+            if (this.WinningPlayerIds.Count != other.WinningPlayerIds.Count) { return false; }
+            foreach(int id in this.WinningPlayerIds)
+            {
+                if (!other.WinningPlayerIds.Contains(id))
+                    return false;
+            }
 
             if (this.Players == null && other.Players != null) { return false; }
             if (this.Players != null && other.Players == null) { return false; }
@@ -390,11 +426,11 @@ namespace GameObjects
         /// </summary>
         public override int GetHashCode()
         {
-            int hashcode = this.Id.GetHashCode() ^ 
-                           this.TotalRoundsInThisGame.GetHashCode() ^ 
-                           this.DiceToRollEachRound.GetHashCode() ^ 
-                           this.WinningPlayerId.GetHashCode();
+            int hashcode = this.Id.GetHashCode() ^
+                           this.TotalRoundsInThisGame.GetHashCode() ^
+                           this.DiceToRollEachRound.GetHashCode();
 
+            if (!this.WinningPlayerIds.IsNullOrEmpty()) { this.WinningPlayerIds.ForEach(id => hashcode ^= id.GetHashCode()); }
             if (!this.Players.IsNullOrEmpty()) { this.Players.ForEach(player => hashcode ^= player.GetHashCode()); }
             if (!this.GameRoundsCompleted.IsNullOrEmpty()) { this.GameRoundsCompleted.ForEach(round => hashcode ^= round.GetHashCode()); }
             if(!this.MapOfDiceValues.IsNullOrEmpty())
@@ -412,11 +448,21 @@ namespace GameObjects
         public override string ToString()
         {
             StringBuilder bldr = new StringBuilder();
-            bldr.AppendFormat("Game: Id: {0}, TotalRoundsInThisGame: {1}, DiceToRollEachRound: {2}, WinningPlayerId: {3}, ",
+            bldr.AppendFormat("Game: Id: {0}, TotalRoundsInThisGame: {1}, DiceToRollEachRound: {2}, ",
                               this.Id,
                               this.TotalRoundsInThisGame,
-                              this.DiceToRollEachRound,
-                              this.WinningPlayerId);
+                              this.DiceToRollEachRound);
+
+            if (this.WinningPlayerIds.IsNullOrEmpty())
+                bldr.Append("WinningPlayerIds: None ");
+            else
+            {
+                bldr.Append("WinningPlayerIds: [");
+                foreach (int id in this.WinningPlayerIds)
+                    bldr.AppendFormat("{0}, ", id);
+
+                bldr.Append("], ");
+            }
 
             if (this.Players.IsNullOrEmpty())
                 bldr.Append("Players: None ");

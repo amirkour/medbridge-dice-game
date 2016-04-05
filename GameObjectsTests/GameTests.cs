@@ -534,5 +534,42 @@ namespace GameObjectsTests
             Assert.AreEqual(lowScorers.Count, 1);
             Assert.AreEqual(lowScorers[0], game.Players[1]);
         }
+
+        [TestMethod]
+        public void GameTests_IsGameOver_ReturnsFalse_WhenAllRoundsNotComplete()
+        {
+            var mockGame = new Mock<Game>();
+            mockGame.Setup(game => game.AllRoundsComplete()).Returns(false);
+            Assert.IsFalse(mockGame.Object.IsGameOver());
+        }
+
+        [TestMethod]
+        public void GameTests_IsGameOver_ReturnsTrue_WhenAllRoundsComplete()
+        {
+            List<Player> winners = new List<Player>();
+            winners.Add(new Player() { Id = 1 });
+
+            var mockGame = new Mock<Game>();
+            mockGame.Setup(game => game.AllRoundsComplete()).Returns(true);
+            mockGame.Setup(game => game.GetLowestScoringPlayers()).Returns(winners);
+
+            mockGame.Object.WinningPlayerIds = null;
+            mockGame.Object.Players = new List<Player>();
+            Assert.IsTrue(mockGame.Object.IsGameOver());
+            Assert.IsNotNull(mockGame.Object.WinningPlayerIds);
+            Assert.AreEqual(mockGame.Object.WinningPlayerIds[0], winners[0].Id);
+        }
+
+        [TestMethod]
+        public void GameTests_IsGameOver_ReturnsTrue_WhenWinningIDsArePresent()
+        {
+            Game game = new Game()
+            {
+                WinningPlayerIds = new List<int>()
+            };
+
+            game.WinningPlayerIds.Add(1);
+            Assert.IsTrue(game.IsGameOver());
+        }
     }
 }
